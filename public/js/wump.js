@@ -15,5 +15,5 @@
 
 "a.remove".onClick(function(event) {
   event.stop();
-  this.parent.load( this.getAttribute("href"));
+  this.parent().load( this.get('pathname'));
 });

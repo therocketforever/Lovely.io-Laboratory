@@ -57,7 +57,7 @@ end
 # This is the post method for createing a new Location from the form on the index page
 post '/addaddress' do
   Location.create( address: params[:address])
-  redirect '/'
+  redirect '/' unless request.xhr?
 end
 
 # This is the confermation page at the begining of the delete process. A `No` link is providet to return to the list on the index page. a `Yes` button is provided to submit a form wich will activate the delete route. 
@@ -69,7 +69,7 @@ end
 # This route is activated by the `Yes` form on the delete confermation page. The Location record will be queried & destroyed by it's `_ID` value.
 delete '/:id' do
   Location.find(params[:id]).destroy
-  redirect '/'
+  redirect '/' unless request.xhr?
 end
 
 
@@ -80,26 +80,29 @@ __END__
 %html
   %head
     -#%script{src="http://cdn.lovely.io/core.js"}
-    %script{src: "/script.js"}
   %body
     = yield
-  %script{src: "/js/lovely/core-1.1.0.js", type: "text/javascript"}
-
+  -#%script{src: "/js/lovely/core-1.1.0.js", type: "text/javascript"}
+  %script{src: "/js/right/right.js", type: "text/javascript"}
+  %script{src: "/script.js"}
+  %script{src: "/js/wump.js", type:"text/javascript"}
+  
 @@index
-%p Hello World, Here are some Addresses!
-%ul
+%h1 Hello World, Here are some Addresses!
+%ul{ :id => "addresses"}
   - @locations.each do |location|
-    %li 
-      = location.address
-      %br
-      = location.coordinates
-      %a{:href => "/#{location.id}/delete"} Remove
+    %div{ :id => "#{location.id}"}
+      %li 
+        = location.address
+        %br
+        = location.coordinates
+        %a{ :class => "remove", :href => "/#{location.id}/delete"} Remove
 %br
 = haml :addaddress
       
 @@addaddress
-%p Add a New Location  
-%form{ :action => "/addaddress", :method => "post"}
+%h2 Add a New Location  
+%form{ :id => "addaddress", :action => "/addaddress", :method => "post"}
   %p "This address must be something that can be looked up via Geocoder 'cause I have not yet implemented validations."
   %label{ :for => "address"} New Address:
   %input{ :type => "text", :name => "address"}
@@ -108,7 +111,7 @@ __END__
 @@deleteaddress
 %p Are you sure you want to remove this addres?
 = @location.address
-%form{ :action => "/#{@location.id}", :method => "post"}
+%form{ :id => "deleteaddress", :action => "/#{@location.id}", :method => "post"}
   %input{ :type => "hidden", :name => "_method", :value => "delete"}
   %input{ :type => "submit", :value => "Yes"}
   %a{ :href => '/'} No
