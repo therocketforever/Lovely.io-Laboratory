@@ -1,24 +1,38 @@
-[ "sinatra", "data_mapper", "dm-redis-adapter", "haml", "sass", "coffee-script", "geocoder",].each { |gem| require gem}
+[ "sinatra", "mongoid", "haml", "sass", "coffee-script", "geocoder",].each { |gem| require gem}
 
 enable :inline_templates
 
-DataMapper.setup(:default, {:adapter  => "redis"})
+Mongoid.load!("mongoid.yml")
+Mongoid.logger.level = Logger::DEBUG
+Mongoid.logger = Logger.new($stdout)
+
+Geocoder.configure.timeout = 10
 
 class Location
-  include DataMapper::Resource
-  property :id, Serial
-  property :latitude, Float
-  property :longitute, Float
+  include Mongoid::Document
+  field :addressable
+  field :coordinates, type: Array
+  field :city
+  field :state
+  field :postal_code
+  
+  def address=(query)
+    self.addressable = query unless self.addressable
+    self.geocode
+  end
   
   def address
-    puts "I am an Address!"
+    self.addressable
   end
   
-  def geocode
-    puts "I am the geocoder!!!"
+  def geocode( query = self.addressable )
+    location = Geocoder.search( query ).pop
+    self.coordinates = location.coordinates
+    self.addressable = location.address
+    self.city = location.city
+    self.state = location.state
+    self.postal_code = location.postal_code
   end
-  
-  
 end
 
 get '/script.js' do
