@@ -1,4 +1,4 @@
-[ "sinatra", "mongoid", "haml", "sass", "coffee-script", "geocoder",].each { |gem| require gem}
+[ "sinatra", "mongoid", "haml", "sass", "coffee-script", "geocoder", "pry"].each { |gem| require gem}
 
 enable :inline_templates
 
@@ -46,7 +46,23 @@ get '/script.js' do
 end
 
 get '/' do
+  @locations = Location.all.entries
   haml :index
+end
+
+post '/addaddress' do
+  Location.create( address: params[:address])
+  redirect '/'
+end
+
+get '/:id/delete' do
+  @location = Location.find(params[:id])
+  haml :deleteaddress
+end
+
+delete '/:id' do
+  Location.find(params[:id]).destroy
+  redirect '/'
 end
 
 __END__
@@ -56,10 +72,35 @@ __END__
 %html
   %head
     -#%script{src="http://cdn.lovely.io/core.js"}
-    
     %script{src: "/script.js"}
-%body
-  = yield
+  %body
+    = yield
+  %script{src: "/js/lovely/core-1.1.0.js", type: "text/javascript"}
 
 @@index
-%p Hello World
+%p Hello World, Here are some Addresses!
+%ul
+  - @locations.each do |location|
+    %li 
+      = location.address
+      %br
+      = location.coordinates
+      %a{:href => "/#{location.id}/delete"} Remove
+%br
+= haml :addaddress
+      
+@@addaddress
+%p Add a New Location  
+%form{ :action => "/addaddress", :method => "post"}
+  %p "This address must be something that can be looked up via Geocoder 'cause I have not yet implemented validations."
+  %label{ :for => "address"} New Address:
+  %input{ :type => "text", :name => "address"}
+  %input{:type => "submit", :value => "Add"}
+  
+@@deleteaddress
+%p Are you sure you want to remove this addres?
+= @location.address
+%form{ :action => "/#{@location.id}", :method => "post"}
+  %input{ :type => "hidden", :name => "_method", :value => "delete"}
+  %input{ :type => "submit", :value => "Yes"}
+  %a{ :href => '/'} No
