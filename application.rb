@@ -18,18 +18,18 @@ class Location
   field :state
   field :postal_code
   
-# Location::address=() sets the value of self.addressable & passes this value to self.geocode as the encodeing argument
+# `Location::address=()` sets the value of `self.addressable` & passes this value to `self.geocode` as the encodeing argument
   def address=(query)
     self.addressable = query unless self.addressable
     self.geocode
   end
   
-# Location::address returns the value of self.addressable
+# `Location::address` returns the value of `self.addressable`
   def address
     self.addressable
   end
   
-# Location::geocode() querys the Geocoder::search method, sets the value of location to the returned result & sets the various properties of the particular instance of Location to the corrisponding values. location.address is set to location.addressable to preserve the namespace for Location::address=() & Location::address.
+# `Location::geocode()` querys the `Geocoder::search` method, sets the value of location to the returned result & sets the various properties of the particular instance of Location to the corrisponding values. `location.address` is set to `location.addressable` to preserve the namespace for `Location::address=()` & `Location::address.`
   def geocode( query = self.addressable )
     location = Geocoder.search( query ).pop
     self.coordinates = location.coordinates
@@ -40,33 +40,41 @@ class Location
   end
 end
 
+# Various links to redirect browser requests to the appropriate file.
 get '/script.js' do
   content_type "text/javascript", :charset => 'utf-8'
   coffee :script
 end
 
+# RESTful routes to define the structure of our application.
+# This is the main index page it lists our address as well as provides a form to add a new address. The new address is persisted via Mondoid's `Location.create`.  
 get '/' do
   @locations = Location.all.entries
   haml :index
 end
 
+
+# This is the post method for createing a new Location from the form on the index page
 post '/addaddress' do
   Location.create( address: params[:address])
   redirect '/'
 end
 
+# This is the confermation page at the begining of the delete process. A `No` link is providet to return to the list on the index page. a `Yes` button is provided to submit a form wich will activate the delete route. 
 get '/:id/delete' do
   @location = Location.find(params[:id])
   haml :deleteaddress
 end
 
+# This route is activated by the `Yes` form on the delete confermation page. The Location record will be queried & destroyed by it's `_ID` value.
 delete '/:id' do
   Location.find(params[:id]).destroy
   redirect '/'
 end
 
-__END__
 
+# Here be HAML...
+__END__
 @@layout
 !!! 5
 %html
