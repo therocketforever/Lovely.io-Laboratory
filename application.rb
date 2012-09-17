@@ -42,7 +42,6 @@ end
 
 # Various links to redirect browser requests to the appropriate file.
 get '/script.js' do
-  content_type "text/javascript", :charset => 'utf-8'
   coffee :script
 end
 
@@ -79,13 +78,11 @@ __END__
 !!! 5
 %html
   %head
-    -#%script{src="http://cdn.lovely.io/core.js"}
   %body
     = yield
   -#%script{src: "/js/lovely/core-1.1.0.js", type: "text/javascript"}
   %script{src: "/js/right/right.js", type: "text/javascript"}
   %script{src: "/script.js"}
-  %script{src: "/js/wump.js", type:"text/javascript"}
   
 @@index
 %h1 Hello World, Here are some Addresses!

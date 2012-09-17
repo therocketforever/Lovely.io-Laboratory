@@ -1,19 +1,14 @@
-"form.deleteaddress".onSubmit(function(event) {
-   this.parent().fade();
-   event.stop();
-   this.send();
- });
- 
- "form.addaddress".onSubmit(function(event) {
- event.stop();
- this.send({
-   onSuccess: function(xhr) {
-   $('addresses').insert(xhr.responseText);
-  }
- });
-});
+"form.deleteaddress".onSubmit (event) ->
+  @parent().fade()
+  event.stop()
+  @send()
 
-"a.remove".onClick(function(event) {
-  event.stop();
-  this.parent.load( this.getAttribute("href"));
-});
+"form.addaddress".onSubmit (event) ->
+  event.stop()
+  @send onSuccess: (xhr) ->
+    $("addresses").insert xhr.responseText
+
+
+"a.remove".onClick (event) ->
+  event.stop()
+  @parent().load @get("pathname")
